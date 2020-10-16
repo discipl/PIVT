@@ -261,13 +261,12 @@ spec:
               --version {{ $version }} --lang {{ $language }}
 
           {{- else }}
-
+          
           # chaincode is packed with tar, first extract it 
           mkdir -p /chaincode && 
           tar -xf /hlf_config/chaincode/{{ $chaincode.name }}.tar -C /chaincode && 
           peer chaincode install --path /chaincode/{{ $chaincode.name }} --name {{ $chaincode.name }} \
-              --version {{ $version }} --lang {{ $language }}
-
+              --version {{ $version }} --lang {{ $language }} 
           {{- end }}
 
       volumeMounts:
@@ -360,7 +359,8 @@ spec:
               exit $result 
             fi 
           fi 
-
+          mkdir -p /chaincode && tar -xf /hlf_config/chaincode/{{ $chaincode.name }}.tar -C /chaincode
+          ls -al /chaincode/{{ $chaincode.name }}/;
           if [ -z "$doUpgrade" ]; then 
             echo '-- Chaincode {{ $chaincode.name }} is not instantiated on channel {{ $channel.name }}, will instantiate..' 
             peer chaincode instantiate --name {{ $chaincode.name }} --version {{ $version }} --lang {{ $language }} \
@@ -369,12 +369,18 @@ spec:
             {{- if $.Values.tlsEnabled }}
                   --tls --cafile /hlf_config/orderer-tlsca/tlscacert.pem \
             {{- end }}
+            {{- if $chaincode.collectionConfig }}
+                  --collections-config /chaincode/{{ $chaincode.name }}/{{ $chaincode.collectionConfig }} \
+            {{- end }}
           ; else 
             peer chaincode upgrade --name {{ $chaincode.name }} --version {{ $version }} --lang {{ $language }} \
                   --channelID {{ $channel.name }} --orderer {{ $vars.ordererUrl }} \
                   --policy "{{ $channel.policy }}" --ctor '{"Args":[""]}' \
             {{- if $.Values.tlsEnabled }}
                   --tls --cafile /hlf_config/orderer-tlsca/tlscacert.pem \
+            {{- end }}
+            {{if $chaincode.collectionConfig }}
+                  --collections-config /chaincode/{{ $chaincode.name }}/{{ $chaincode.collectionConfig }} \
             {{- end }}
           ; fi
 
@@ -385,6 +391,8 @@ spec:
           name: peer-{{ $org.Name | lower }}-{{ $peer | lower }}-tls
         - mountPath: /etc/hyperledger/fabric/msp/
           name: peer-{{ $org.Name | lower }}-admin-msp
+        - mountPath: /hlf_config/chaincode/
+          name: chaincode-{{ $chaincode.name | lower }}
       
       env:
         - name: CORE_PEER_ADDRESS

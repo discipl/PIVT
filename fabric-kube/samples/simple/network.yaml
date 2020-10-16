@@ -17,7 +17,7 @@ network:
   chaincodes:
     - name: very-simple
       # if defined, this will override the global chaincode.version value
-      version: # "2.0" 
+      version: #"2.0" 
       # chaincode will be installed to all peers in these organizations
       orgs: [Karga, Nevergreen, Atlantis]
       # at which channels are we instantiating/upgrading chaincode?
@@ -27,6 +27,7 @@ network:
         # chaincode will be invoked on all peers in these organizations
         orgs: [Karga, Nevergreen, Atlantis]
         policy: OR('KargaMSP.member','NevergreenMSP.member','AtlantisMSP.member')
+      collectionConfig: collections_config.json
         
     - name: even-simpler
       # if defined, this will override the global chaincode.language value
