@@ -360,26 +360,25 @@ spec:
             fi 
           fi 
           mkdir -p /chaincode && tar -xf /hlf_config/chaincode/{{ $chaincode.name }}.tar -C /chaincode
-          ls -al /chaincode/{{ $chaincode.name }}/;
+          ls -al /chaincode/{{ $chaincode.name }}/
+          {{- if $chaincode.collectionConfig }}
+                  --collections-config /chaincode/{{ $chaincode.name }}/{{ $chaincode.collectionConfig }} ;
+            {{- end }}
           if [ -z "$doUpgrade" ]; then 
             echo '-- Chaincode {{ $chaincode.name }} is not instantiated on channel {{ $channel.name }}, will instantiate..' 
             peer chaincode instantiate --name {{ $chaincode.name }} --version {{ $version }} --lang {{ $language }} \
                   --channelID {{ $channel.name }} --orderer {{ $vars.ordererUrl }} \
                   --policy "{{ $channel.policy }}" --ctor '{"Args":[""]}' \
             {{- if $.Values.tlsEnabled }}
-                  --tls --cafile /hlf_config/orderer-tlsca/tlscacert.pem \
-            {{- end }}
-            {{- if $chaincode.collectionConfig }}
+                  --tls --cafile /hlf_config/orderer-tlsca/tlscacert.pem \ {{- end }}{{- if $chaincode.collectionConfig }}
                   --collections-config /chaincode/{{ $chaincode.name }}/{{ $chaincode.collectionConfig }} \
             {{- end }}
-          ; else 
+           ; else 
             peer chaincode upgrade --name {{ $chaincode.name }} --version {{ $version }} --lang {{ $language }} \
                   --channelID {{ $channel.name }} --orderer {{ $vars.ordererUrl }} \
                   --policy "{{ $channel.policy }}" --ctor '{"Args":[""]}' \
             {{- if $.Values.tlsEnabled }}
-                  --tls --cafile /hlf_config/orderer-tlsca/tlscacert.pem \
-            {{- end }}
-            {{if $chaincode.collectionConfig }}
+                  --tls --cafile /hlf_config/orderer-tlsca/tlscacert.pem \ {{- end }}{{if $chaincode.collectionConfig }}
                   --collections-config /chaincode/{{ $chaincode.name }}/{{ $chaincode.collectionConfig }} \
             {{- end }}
           ; fi

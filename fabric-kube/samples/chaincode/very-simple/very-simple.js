@@ -25,17 +25,13 @@ const Chaincode = class {
     }
   }
   
-  async ping() {
+  async ping(stub, args) {
     logger.info("ping called", "");
-    const answer = { ping: 'pong' };
+    const answer = { adres: 'test' };
 
-    // get the transient maplet transientMarble = stub.getTransient();// convert into buffer
-    // var buffer = new Buffer(transientMarble.map.conversation.value.toArrayBuffer());// from buffer into string
-    // var JSONString = buffer.toString("utf8");// from json string into object
-    var JSONObject = JSON.parse(JSONString);
-    await stub.putPrivateData("collectionAdres", "1231123123", answer);
-
-    return Buffer.from(JSON.stringify(answer), 'utf8');
+    const result = await stub.putPrivateData("collectionAdres", "1231123123", JSON.stringify(answer));
+    logger.info("")
+    return Buffer.from(JSON.stringify(result), 'utf8');
   }
 };
 
